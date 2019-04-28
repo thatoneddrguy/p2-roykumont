@@ -1,0 +1,13 @@
+no Linux-specific functions needed...? besides tar-ing the directory
+
+first character on first line is total # of processes
+
+when process completes (i.e. t=1000 in out1.txt), the frames used by that process are freed (i.e. 0-399)
+
+when new processes are added, they try to use the earliest available memory
+
+data we need to keep track of:
+1. time each process enters queue
+2. burst time of each process
+3. memory pieces for each process
+4. average turnaround time
