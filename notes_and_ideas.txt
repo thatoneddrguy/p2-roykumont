@@ -9,7 +9,7 @@ go through entire file first and store process data into appropriate data struct
 then call separate function to actually process the data that we've stored into the data structures
 
 single function for checking for process arrivals and process completions (t = <...>)
-	- process completions are processed 
+	- process completions are processed before arrivals
 	- when this happens, print memory map
 
 ====================
