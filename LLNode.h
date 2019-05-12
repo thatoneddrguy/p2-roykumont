@@ -1,6 +1,7 @@
 // LinkedList Node defintion
 struct LLNode
 {
-  int processNum;
-  LLNode* next;
+    int processNum;
+    int processPageNum;
+    LLNode* next;
 };
