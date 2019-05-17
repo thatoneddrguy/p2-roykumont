@@ -15,27 +15,7 @@ single function for checking for process arrivals and process completions (t = <
 
 ====================
 
-when process completes (i.e. t=1000 in out1.txt), the frames used by that process are freed (i.e. 0-399)
-
-when new processes are added, they try to use the earliest available memory
-
-if there is space for process, then process is added to that free space, otherwise process must wait until enough free frames in memory map
-
-data we need to keep track of:
-1. arrival time of each process
-	- queue with size specified by first character on first line
-2. burst time of each process
-	- queue with size specified by first character on first line
-		+ add time a process waits until enough space is in memory map to its burst time
-(completion time calculated from arrival time + burst time of each process)
-3. memory pieces for each process
-	- queue with combined memory requirements of each process
-4. average turnaround time
-5. memory map
-	- linkedlist corresponding to the pages of memory map
-		+ linkedlist elements store process #, if process # is 0 then frame is free (no process using that page), otherwise corresponds to process # currently using that page of memory
-6. input queue
-	- queue keeping track of which processes are waiting for free frames, dequeue first process and add it to memory map if there is enough space for it
+output(), MMDisplay()
 
 ====================
 
