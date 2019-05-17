@@ -1,33 +1,25 @@
 #include <iostream>
 #include <fstream>
 #include <queue>
-#include "LLNode.h"
-#include "Process.h"
+#include "process.h"
+#include "memblock.h"
 using namespace std;
 
 int main()
 {
-    int memSize;
+    int freeMemory;
     int pageSize = 0;  // 0 == not set
     int numProcesses = 0;
     bool inFreeFrames = false;
     ifstream inFile = ifstream("in1.txt");
     //ofstream outFile = ofstream("out.txt");
-    // the 3 queues below can all be stored in Process struct
-    /*queue <int> arrivalTimes;
-    queue <int> burstTimes;
-    queue <int> memoryNeeds;*/
-    queue<Process> processQueue;  // add processes as they are read in from input file
-    vector<Process> inputQueue;  // processes in input queue (actually a vector) are processed front-to-back, removing from this "queue" and adding to MMU if MMU has enough space for that process
+    queue<process> processQueue;  // add processes as they are read in from input file
+    queue<process> inputQueue;  // processes in input queue (actually a vector) are processed front-to-back, removing from this "queue" and adding to MMU if MMU has enough space for that process
     vector<long> criticalPoints;  // keep track of points where we have to write to output
-    vector<Process> mmuInProgress;  // keep track of processes that are currently being processed by MMU
-    LLNode* mmu = NULL;
     double avgTurnaroundTime = 0.0;
 
-    mmu = new LLNode();
-
     cout << "Memory size>";
-    cin >> memSize;
+    cin >> freeMemory;
     cout << "\n";
 
     do
@@ -58,14 +50,13 @@ int main()
 
     inFile >> numProcesses;
 
-    while(!inFile.eof())
+    while(!inFile.eof() && numProcesses != 0)
     {
         int numMemoryPieces = 0;
-        Process p1;
+        process p1;
         inFile >> p1.processNum;
         inFile >> p1.arrivalTime;
         inFile >> p1.burstTime;
-        p1.memoryNeed = 0;  // note: only one struct is actually being created, it seems...
         inFile >> numMemoryPieces;
         for(int i = 0; i < numMemoryPieces; i++)
         {
@@ -77,6 +68,8 @@ int main()
         cout << "arrivalTime: " << p1.arrivalTime << "\n";
         cout << "burstTime: " << p1.burstTime << "\n";
         cout << "memoryNeed: " << p1.memoryNeed << "\n";
+
+        numProcesses--;
     }
 
     cout << "Press ENTER to quit program.";

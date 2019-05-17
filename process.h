@@ -1,5 +1,5 @@
-// Process defintion
-struct Process
+// process defintion
+struct process
 {
     int processNum;
     int arrivalTime;
