@@ -15,7 +15,10 @@ single function for checking for process arrivals and process completions (t = <
 
 ====================
 
-output(), MMDisplay()
+output(), MMDisplay() [separate code into separate functions]
+use queue instead of vector for "que"
+change if-else for pagesize input to switch
+inputfile.open() --> call directly in constructor
 
 ====================
 
