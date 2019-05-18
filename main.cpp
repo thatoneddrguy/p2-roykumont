@@ -6,7 +6,7 @@
 #include "memblock.h"
 using namespace std;
 
-void printInputQueue(queue<process> q);
+void printInputQueue(vector<process> q);
 void printMMU(vector<memblock> &m, int pageSz);
 
 int main()
@@ -17,7 +17,7 @@ int main()
     ifstream inFile = ifstream("in1.txt");
     //ofstream outFile = ofstream("out.txt");
     queue<process> processQueue;  // add processes as they are read in from input file
-    queue<process> inputQueue;  // processes in input queue (actually a vector) are processed front-to-back, removing from this "queue" and adding to MMU if MMU has enough space for that process
+    vector<process> inputQueue;  // processes in input queue (actually a vector) are processed front-to-back, removing from this "queue" and adding to MMU if MMU has enough space for that process
     vector<long> criticalPoints;  // keep track of points where we have to write to output
     vector<memblock> mmu;  // MMU, composed of vector of memblocks
     vector<process> processesInMemory;  // keep track of which processes are currently in memory map
@@ -79,6 +79,7 @@ int main()
         inFile >> p1.arrivalTime;
         inFile >> p1.burstTime;
         inFile >> numMemoryPieces;
+        p1.memoryNeed = 0;
         for(int i = 0; i < numMemoryPieces; i++)
         {
             int memoryPiece;
@@ -118,7 +119,8 @@ int main()
         while(currentProcess.arrivalTime == currentCriticalPoint)
         {
             processQueue.pop();
-            inputQueue.push(currentProcess);
+            //inputQueue.push(currentProcess);
+            inputQueue.push_back(currentProcess);
             if(tLine)
             {
                 tLine = false;
@@ -133,12 +135,39 @@ int main()
         }
 
         // check if there is enough memory in MMU for any process in inputQueue
-        currentProcess = inputQueue.front();
-        /*while(freeMemory > currentProcess.memoryNeed && !inputQueue.empty())
+        for(auto i = inputQueue.begin(); i != inputQueue.end(); i++)
         {
+            currentProcess = *i;
+            if(freeMemory >= currentProcess.memoryNeed)
+            {
+                // move process from inputQueue to processesInMemory
+                inputQueue.erase(i);
+                i--;  // move iterator back after erasing front element...
+                processesInMemory.push_back(currentProcess);
+                cout << "\tMM moves Process " << currentProcess.processNum << " to memory" << endl;
 
-        }*/
-        printMMU(mmu, pageSize);
+                // decrease currentProcess.memoryNeed until all needed pages are used
+                int currentPage = 1;
+                while(currentProcess.memoryNeed > 0)
+                {
+                    bool pageInserted = false;
+                    currentProcess.memoryNeed -= pageSize;
+                    freeMemory -= pageSize;
+                    for(auto j = mmu.begin(); j != mmu.end(); j++)
+                    {
+                        if(j->processNum == 0 && !pageInserted)
+                        {
+                            j->processNum = currentProcess.processNum;
+                            j->pageNum = currentPage;
+                            currentPage++;
+                            pageInserted = true;
+                        }
+                    }
+                }
+                printInputQueue(inputQueue);
+                printMMU(mmu, pageSize);
+            }
+        }
 
         // check if any processes in MMU completed processing
 
@@ -146,7 +175,8 @@ int main()
 
         // keep criticalPoints sorted in ascending order
         sort(criticalPoints.begin(), criticalPoints.end());
-    }
+        cout << endl;
+    }  // end of checking criticalPoints
 
     for(auto i = criticalPoints.begin(); i != criticalPoints.end(); i++)
     {
@@ -158,13 +188,13 @@ int main()
     return 0;
 }
 
-void printInputQueue(queue<process> q)  // argument passed by value, so original inputQueue not changed
+void printInputQueue(vector<process> q)  // argument passed by value, so original inputQueue not changed
 {
     cout << "\tInput Queue: [";
     while(!q.empty())
     {
         cout << q.front().processNum;
-        q.pop();
+        q.erase(q.begin());
         if(!q.empty())
         {
             cout << " ";
