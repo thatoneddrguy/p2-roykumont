@@ -7,19 +7,20 @@
 using namespace std;
 
 void printInputQueue(queue<process> q);
+void printMMU(vector<memblock> &m, int pageSz);
 
 int main()
 {
     int freeMemory;
     int pageSize = 0;  // 0 == not set
     int numProcesses = 0;
-    //bool inFreeFrames = false;
     ifstream inFile = ifstream("in1.txt");
     //ofstream outFile = ofstream("out.txt");
     queue<process> processQueue;  // add processes as they are read in from input file
     queue<process> inputQueue;  // processes in input queue (actually a vector) are processed front-to-back, removing from this "queue" and adding to MMU if MMU has enough space for that process
     vector<long> criticalPoints;  // keep track of points where we have to write to output
     vector<memblock> mmu;  // MMU, composed of vector of memblocks
+    vector<process> processesInMemory;  // keep track of which processes are currently in memory map
     double avgTurnaroundTime = 0.0;
 
     cout << "Memory size>";
@@ -131,6 +132,14 @@ int main()
             currentProcess = processQueue.front();
         }
 
+        // check if there is enough memory in MMU for any process in inputQueue
+        currentProcess = inputQueue.front();
+        /*while(freeMemory > currentProcess.memoryNeed && !inputQueue.empty())
+        {
+
+        }*/
+        printMMU(mmu, pageSize);
+
         // check if any processes in MMU completed processing
 
         criticalPoints.erase(criticalPoints.begin());
@@ -162,4 +171,41 @@ void printInputQueue(queue<process> q)  // argument passed by value, so original
         }
     }
     cout << "]" << endl;
+}
+
+void printMMU(vector<memblock> &m, int pageSz)
+{
+    /*
+    m.at(1).processNum = 1;
+    m.at(1).pageNum = 1;
+    */
+    bool inFreeFrames = false;
+    cout << "\tMemory map:" << endl;
+    for(int i = 0; i < m.size(); i++)
+    {
+        memblock currentMemBlock = m.at(i);
+        if(currentMemBlock.processNum == 0)
+        {
+            if(!inFreeFrames)
+            {
+                cout << "\t\t" << (i*pageSz) << "-";
+                inFreeFrames = true;
+            }
+            // else move on to the next memblock
+
+            if(i == m.size() - 1) // reached last memblock
+            {
+                cout << (((i+1)*pageSz) - 1) << ": Free frame(s)" << endl;
+            }
+        }
+        else
+        {
+            if(inFreeFrames) // close out previous free frame output
+            {
+                cout << ((i*pageSz) - 1) << ": Free frame(s)" << endl;
+                inFreeFrames = false;
+            }
+            cout << "\t\t" << (i*pageSz) << "-" << (((i+1)*pageSz) - 1) << ": Process " << currentMemBlock.processNum << ", Page " << currentMemBlock.pageNum << endl;
+        }
+    }
 }
