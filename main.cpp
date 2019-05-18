@@ -2,6 +2,7 @@
 #include <fstream>
 #include <queue>
 #include <algorithm>
+#include <iomanip>
 #include "process.h"
 #include "memblock.h"
 using namespace std;
@@ -15,6 +16,7 @@ int main()
     int freeMemory;
     int pageSize = 0;  // 0 == not set
     int numProcesses = 0;
+    int initialNumProcesses = 0;
     ifstream inFile = ifstream("in1.txt");
     //ofstream outFile = ofstream("out.txt");
     queue<process> processQueue;  // add processes as they are read in from input file
@@ -22,7 +24,7 @@ int main()
     vector<long> criticalPoints;  // keep track of points where we have to write to output
     vector<memblock> mmu;  // MMU, composed of vector of memblocks
     vector<process> processesInMemory;  // keep track of which processes are currently in memory map
-    double avgTurnaroundTime = 0.0;
+    double totalTurnaroundTime = 0.0;
 
     cout << "Memory size>";
     cin >> freeMemory;
@@ -71,6 +73,7 @@ int main()
     */
 
     inFile >> numProcesses;
+    initialNumProcesses = numProcesses;
 
     while(!inFile.eof() && numProcesses != 0)
     {
@@ -168,6 +171,29 @@ int main()
         }
 
         // check if any processes in MMU completed processing
+        for(auto i = processesInMemory.begin(); i != processesInMemory.end(); i++)
+        {
+            currentProcess = *i;
+            if(currentProcess.endTime == currentCriticalPoint)
+            {
+                for(auto j = mmu.begin(); j != mmu.end(); j++)
+                {
+                    //cout << "j->processNum:" << j->processNum << " ?= " << currentProcess.processNum << endl;
+                    if(j->processNum == currentProcess.processNum)  // free up memory from MMU
+                    {
+                        j->processNum = 0;
+                        j->pageNum = 0;
+                        freeMemory += pageSize;
+                    }
+                }
+
+                processesInMemory.erase(i);
+                i--;
+                totalTurnaroundTime += (currentProcess.endTime - currentProcess.arrivalTime);
+                cout << "Process " << currentProcess.processNum << " completes" << endl;
+                printMMU(mmu, pageSize);
+            }
+        }
 
         criticalPoints.erase(criticalPoints.begin());
 
@@ -182,6 +208,11 @@ int main()
         cout << *i << endl;
     }
     */
+
+    cout << std::fixed;
+    cout << std::setprecision(2);
+    //cout << "Total Turnaround Time: " <<  totalTurnaroundTime << endl;
+    cout << "\nAverage Turnaround Time: " <<  (totalTurnaroundTime / initialNumProcesses) << endl;
 
     cout << "Press ENTER to quit program.";
     cin.ignore().get();
