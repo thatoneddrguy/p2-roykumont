@@ -110,6 +110,7 @@ int main()
     while(!criticalPoints.empty())
     {
         bool tLine = true;  // boolean to keep track of whether or not this is a "t = " line for formatting purposes (no \t on tLine)
+        bool arrivalOnly = true;  // printMMU at end if only arrivals were processed at this critical point...
         long currentCriticalPoint = criticalPoints.front();
         cout << "t = " << currentCriticalPoint << ": ";
 
@@ -133,6 +134,40 @@ int main()
             currentProcess = processQueue.front();
         }
 
+        // check if any processes in MMU completed processing
+        for(auto i = processesInMemory.begin(); i != processesInMemory.end(); i++)
+        {
+            currentProcess = *i;
+            if(currentProcess.endTime == currentCriticalPoint)
+            {
+                arrivalOnly = false;
+                for(auto j = mmu.begin(); j != mmu.end(); j++)
+                {
+                    //cout << "j->processNum:" << j->processNum << " ?= " << currentProcess.processNum << endl;
+                    if(j->processNum == currentProcess.processNum)  // free up memory from MMU
+                    {
+                        j->processNum = 0;
+                        j->pageNum = 0;
+                        freeMemory += pageSize;
+                    }
+                }
+
+                processesInMemory.erase(i);
+                i--;
+                totalTurnaroundTime += (currentProcess.endTime - currentProcess.arrivalTime);
+                if(tLine)
+                {
+                    tLine = false;
+                }
+                else
+                {
+                    cout << "\t";
+                }
+                cout << "Process " << currentProcess.processNum << " completes" << endl;
+                printMMU(mmu, pageSize);
+            }
+        }
+
         // check if there is enough memory in MMU for any process in inputQueue
         for(auto i = inputQueue.begin(); i != inputQueue.end(); i++)
         {
@@ -142,6 +177,7 @@ int main()
                 // move process from inputQueue to processesInMemory
                 inputQueue.erase(i);
                 i--;  // move iterator back after erasing front element...
+                arrivalOnly = false;
                 currentProcess.endTime = currentCriticalPoint + currentProcess.burstTime;
                 processesInMemory.push_back(currentProcess);
                 addUniqueCriticalPoint(criticalPoints, currentProcess.endTime);
@@ -170,29 +206,9 @@ int main()
             }
         }
 
-        // check if any processes in MMU completed processing
-        for(auto i = processesInMemory.begin(); i != processesInMemory.end(); i++)
+        if(arrivalOnly)
         {
-            currentProcess = *i;
-            if(currentProcess.endTime == currentCriticalPoint)
-            {
-                for(auto j = mmu.begin(); j != mmu.end(); j++)
-                {
-                    //cout << "j->processNum:" << j->processNum << " ?= " << currentProcess.processNum << endl;
-                    if(j->processNum == currentProcess.processNum)  // free up memory from MMU
-                    {
-                        j->processNum = 0;
-                        j->pageNum = 0;
-                        freeMemory += pageSize;
-                    }
-                }
-
-                processesInMemory.erase(i);
-                i--;
-                totalTurnaroundTime += (currentProcess.endTime - currentProcess.arrivalTime);
-                cout << "Process " << currentProcess.processNum << " completes" << endl;
-                printMMU(mmu, pageSize);
-            }
+            printMMU(mmu, pageSize);
         }
 
         criticalPoints.erase(criticalPoints.begin());
