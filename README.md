@@ -48,6 +48,6 @@ C++
 ![](testing.PNG)
 
 **Team Collaboration:**
-Our team met up three times at the CSUF library to research the necessary system function calls and collaborate on the code via GitHub.
+Our team met up three times at the CSUF library to research the necessary steps and collaborate on the code via GitHub. Communication done via Discord.
 
 ***Sources**: Professor Yun Tian assignment document posted in Titanium.
