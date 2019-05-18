@@ -41,7 +41,11 @@ C++
     2. Extract files from tar archive.
     3. Open terminal in directory where files are located.
     4. In terminal type make and press enter.
-    5. Please keep the input file name as in1.txt(Hardcoded into program).
+    5. Then enter ./output.    
+    6. Please keep the input file name as in1.txt(Hardcoded into program).
+    7. Enter total memory size and page size(1 for 100, 2 for 200 and 3 for 400).
+    8. Output will be generated into terminal window.
+    
 
 **Team Collaboration:**
 Our team met up three times at the CSUF library to research the necessary system function calls and collaborate on the code via GitHub.
