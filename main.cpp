@@ -6,6 +6,8 @@
 #include "memblock.h"
 using namespace std;
 
+void printInputQueue(queue<process> q);
+
 int main()
 {
     int freeMemory;
@@ -85,6 +87,14 @@ int main()
 
         processQueue.push(p1);
 
+        // add arrival time to criticalPoints if arrival time not already in criticalPoints
+        vector<long>::iterator checkDuplicate = find(criticalPoints.begin(), criticalPoints.end(), p1.arrivalTime);
+        if(checkDuplicate == criticalPoints.end())  // iterator == end means not found in criticalPoints
+        {
+            //cout << "new critical point found" << endl;
+            criticalPoints.push_back(p1.arrivalTime);
+        }
+
         /*
         cout << "processNum: " << p1.processNum << "\n";
         cout << "arrivalTime: " << p1.arrivalTime << "\n";
@@ -95,23 +105,38 @@ int main()
         numProcesses--;
     }
 
-    // processQueue contains process data from input file at this point, being processing by placing processes in inputQueue
-    while(!processQueue.empty())
+    // go through criticalPoints and process arrival/completion events
+    while(!criticalPoints.empty())
     {
-        // move process from processQueue to inputQueue
-        process currentProcess = processQueue.front();
-        processQueue.pop();
-        inputQueue.push(currentProcess);
+        bool tLine = true;  // boolean to keep track of whether or not this is a "t = " line for formatting purposes (no \t on tLine)
+        long currentCriticalPoint = criticalPoints.front();
+        cout << "t = " << currentCriticalPoint << ": ";
 
-        // add arrival time to criticalPoints if arrival time not already in criticalPoints
-        vector<long>::iterator checkDuplicate = find(criticalPoints.begin(), criticalPoints.end(), currentProcess.arrivalTime);
-        if(checkDuplicate == criticalPoints.end())  // iterator == end means not found in criticalPoints
+        // move process from processQueue to inputQueue if criticalPoint matches arrival time, else it must be a completion time
+        process currentProcess = processQueue.front();
+        while(currentProcess.arrivalTime == currentCriticalPoint)
         {
-            //cout << "new critical point found" << endl;
-            criticalPoints.push_back(currentProcess.arrivalTime);
+            processQueue.pop();
+            inputQueue.push(currentProcess);
+            if(tLine)
+            {
+                tLine = false;
+            }
+            else
+            {
+                cout << "\t";
+            }
+            cout << "Process " << currentProcess.processNum << " arrives" << endl;
+            printInputQueue(inputQueue);
+            currentProcess = processQueue.front();
         }
 
-        //cout << "t = " << currentProcess.arrivalTime << " ";
+        // check if any processes in MMU completed processing
+
+        criticalPoints.erase(criticalPoints.begin());
+
+        // keep criticalPoints sorted in ascending order
+        sort(criticalPoints.begin(), criticalPoints.end());
     }
 
     for(auto i = criticalPoints.begin(); i != criticalPoints.end(); i++)
@@ -122,4 +147,19 @@ int main()
     cout << "Press ENTER to quit program.";
     cin.ignore().get();
     return 0;
+}
+
+void printInputQueue(queue<process> q)  // argument passed by value, so original inputQueue not changed
+{
+    cout << "\tInput Queue: [";
+    while(!q.empty())
+    {
+        cout << q.front().processNum;
+        q.pop();
+        if(!q.empty())
+        {
+            cout << " ";
+        }
+    }
+    cout << "]" << endl;
 }
