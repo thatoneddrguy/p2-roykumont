@@ -45,7 +45,7 @@ C++
     6. Please keep the input file name as in1.txt(Hardcoded into program).
     7. Enter total memory size and page size(1 for 100, 2 for 200 and 3 for 400).
     8. Output will be generated into terminal window.
-    ![] (https://github.com/thatoneddrguy/p2-roykumont.git/testing.PNG "test")
+![] (https://github.com/thatoneddrguy/p2-roykumont.git/testing.PNG)
 
 **Team Collaboration:**
 Our team met up three times at the CSUF library to research the necessary system function calls and collaborate on the code via GitHub.
