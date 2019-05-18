@@ -18,6 +18,8 @@ single function for checking for process arrivals and process completions (t = <
 variable to keep track of how much free space in MMU
 output(), MMDisplay() [separate code into separate functions]
 use queue instead of vector for "que"
+add to criticalPoints when process enters MMU
+add to avgTurnaroundTime when process leaves MMU
 
 ====================
 
