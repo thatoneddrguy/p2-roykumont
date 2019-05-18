@@ -8,6 +8,7 @@ using namespace std;
 
 void printInputQueue(vector<process> q);
 void printMMU(vector<memblock> &m, int pageSz);
+void addUniqueCriticalPoint(vector<long> &points, long val);
 
 int main()
 {
@@ -90,12 +91,7 @@ int main()
         processQueue.push(p1);
 
         // add arrival time to criticalPoints if arrival time not already in criticalPoints
-        vector<long>::iterator checkDuplicate = find(criticalPoints.begin(), criticalPoints.end(), p1.arrivalTime);
-        if(checkDuplicate == criticalPoints.end())  // iterator == end means not found in criticalPoints
-        {
-            //cout << "new critical point found" << endl;
-            criticalPoints.push_back(p1.arrivalTime);
-        }
+        addUniqueCriticalPoint(criticalPoints, p1.arrivalTime);
 
         /*
         cout << "processNum: " << p1.processNum << "\n";
@@ -143,7 +139,9 @@ int main()
                 // move process from inputQueue to processesInMemory
                 inputQueue.erase(i);
                 i--;  // move iterator back after erasing front element...
+                currentProcess.endTime = currentCriticalPoint + currentProcess.burstTime;
                 processesInMemory.push_back(currentProcess);
+                addUniqueCriticalPoint(criticalPoints, currentProcess.endTime);
                 cout << "\tMM moves Process " << currentProcess.processNum << " to memory" << endl;
 
                 // decrease currentProcess.memoryNeed until all needed pages are used
@@ -178,10 +176,12 @@ int main()
         cout << endl;
     }  // end of checking criticalPoints
 
+    /*
     for(auto i = criticalPoints.begin(); i != criticalPoints.end(); i++)
     {
         cout << *i << endl;
     }
+    */
 
     cout << "Press ENTER to quit program.";
     cin.ignore().get();
@@ -237,5 +237,15 @@ void printMMU(vector<memblock> &m, int pageSz)
             }
             cout << "\t\t" << (i*pageSz) << "-" << (((i+1)*pageSz) - 1) << ": Process " << currentMemBlock.processNum << ", Page " << currentMemBlock.pageNum << endl;
         }
+    }
+}
+
+void addUniqueCriticalPoint(vector<long> &points, long val)
+{
+    vector<long>::iterator checkDuplicate = find(points.begin(), points.end(), val);
+    if(checkDuplicate == points.end())  // iterator == end means not found in criticalPoints
+    {
+        //cout << "new critical point found" << endl;
+        points.push_back(val);
     }
 }
